@@ -1,69 +1,24 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-
+const express = require("express");
 const app = express();
-const PORT = 3000;
-const tasksFile = path.join(__dirname, 'tasks.json');
+const path = require("path");
+const fs = require("fs");
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../public')));
+const tasksFilePath = path.join(__dirname, "tasks.json");
 
-// Utility to read tasks
-const readTasks = () => {
-  if (!fs.existsSync(tasksFile)) return [];
-  const data = fs.readFileSync(tasksFile);
-  return JSON.parse(data || '[]');
-};
+// Serve files from "Public" folder (index.html, script.js, ramsethu.png)
+app.use(express.static(path.join(__dirname, "../Public")));
 
-// Utility to save tasks
-const saveTasks = (tasks) => {
-  fs.writeFileSync(tasksFile, JSON.stringify(tasks, null, 2));
-};
+// Route: Home page
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../Public/index.html"));
+});
 
-// Get all tasks
-app.get('/tasks', (req, res) => {
-  const tasks = readTasks();
+// Route: Get tasks from tasks.json
+app.get("/api/tasks", (req, res) => {
+  const tasks = JSON.parse(fs.readFileSync(tasksFilePath, "utf-8"));
   res.json(tasks);
 });
 
-// Add new task
-app.post('/tasks', (req, res) => {
-  const tasks = readTasks();
-  const newTask = {
-    id: Date.now(),
-    text: req.body.text,
-    done: false,
-  };
-  tasks.push(newTask);
-  saveTasks(tasks);
-  res.status(201).json(newTask);
-});
-
-// Update task (mark done)
-app.put('/tasks/:id', (req, res) => {
-  const tasks = readTasks();
-  const task = tasks.find((t) => t.id == req.params.id);
-  if (task) {
-    task.done = !task.done;
-    saveTasks(tasks);
-    res.json(task);
-  } else {
-    res.status(404).send('Task not found');
-  }
-});
-
-// Delete task
-app.delete('/tasks/:id', (req, res) => {
-  let tasks = readTasks();
-  tasks = tasks.filter((t) => t.id != req.params.id);
-  saveTasks(tasks);
-  res.status(204).end();
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));

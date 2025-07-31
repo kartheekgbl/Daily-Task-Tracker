@@ -2,7 +2,7 @@
   {
     "id": 1753946097344,
     "text": "Need to change the Selectors for the Cats project",
-    "done": false
+    "done": true
   },
   {
     "id": 1753946142962,
@@ -12,6 +12,11 @@
   {
     "id": 1753952215161,
     "text": "Support for the title tracking process",
+    "done": false
+  },
+  {
+    "id": 1753953257186,
+    "text": "publish to versal",
     "done": false
   }
 ]
