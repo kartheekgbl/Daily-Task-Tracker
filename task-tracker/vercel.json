@@ -1,0 +1,14 @@
+{
+  "routes": [
+    { "src": "/api/tasks", "dest": "/Backend/tasks.json" }
+  ],
+  "rewrites": [
+    { "source": "/tasks", "destination": "/Public/index.html" }
+  ],
+  "headers": [
+    { "source": "/(.*)", "headers": [{ "key": "X-Custom-Header", "value": "my-value" }] }
+  ],
+  "env": {
+    "MY_ENV_VAR": "value"
+  }
+}
