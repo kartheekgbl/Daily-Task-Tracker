@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Task Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    input[type="text"] {
+      width: 75%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    li.done {
+      text-decoration: line-through;
+      color: gray;
+    }
+    .task-buttons button {
+      background: #dc3545;
+      margin-left: 10px;
+    }
+    .task-buttons button:hover {
+      background: #a71d2a;
+    }
+    .task-buttons .done-btn {
+      background: #28a745;
+    }
+    .task-buttons .done-btn:hover {
+      background: #1c7c31;
+    }
+  </style>
+</head>
+<body">
+  <div class="container">
+    <h1>Daily Task Tracker</h1>
+    <input type="text" id="taskInput" placeholder="Enter a new task" />
+    <button onclick="addTask()">Add Task</button>
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    const apiUrl = 'http://localhost:3000/tasks';
+
+    function fetchTasks() {
+      fetch(apiUrl)
+        .then(res => res.json())
+        .then(data => {
+          const taskList = document.getElementById('taskList');
+          taskList.innerHTML = '';
+          data.forEach(task => {
+            const li = document.createElement('li');
+            if (task.done) li.classList.add('done');
+            li.innerHTML = `
+              ${task.text}
+              <div class="task-buttons">
+                <button class="done-btn" onclick="markDone('${task.id}')">Done</button>
+                <button onclick="deleteTask('${task.id}')">Delete</button>
+              </div>`;
+            taskList.appendChild(li);
+          });
+        });
+    }
+
+    function addTask() {
+      const input = document.getElementById('taskInput');
+      const text = input.value.trim();
+      if (!text) return alert("Please enter a task.");
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      }).then(() => {
+        input.value = '';
+        fetchTasks();
+      });
+    }
+
+    function markDone(id) {
+      fetch(`${apiUrl}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ done: true })
+      }).then(fetchTasks);
+    }
+
+    function deleteTask(id) {
+      fetch(`${apiUrl}/${id}`, { method: 'DELETE' })
+        .then(fetchTasks);
+    }
+
+    window.onload = fetchTasks;
+  </script>
+</body>
+</html>
